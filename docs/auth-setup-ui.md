@@ -25,6 +25,9 @@
 - `MiniMax`
 - `DashScope`
 - `Tencent Hunyuan`
+- `DeepSeek`
+- `Z.AI GLM`
+- `OpenRouter`
 - `Custom compatible gateway`
 
 ## 配置保存位置
@@ -84,7 +87,40 @@ $env:CLAUDE_CODE_UI_LANGUAGE = "zh-CN"
 
 目前仍有少量深层文案和部分命令帮助保持英文，这是当前阶段的预期表现。
 
+## 模型选择
+
+DeepSeek、Z.AI GLM 和 OpenRouter 会在 `auth setup` 中显示推荐模型列表。列表基于官方文档和 OpenRouter Models API 在 2026-04-25 的结果整理，同时保留 `Custom model ID` 入口，方便用户手动输入后续新增模型。
+
+### DeepSeek
+
+- `deepseek-v4-pro`
+- `deepseek-v4-flash`
+- `deepseek-chat`
+- `deepseek-reasoner`
+
+### Z.AI GLM
+
+- `glm-5.1`
+- `glm-5-turbo`
+- `glm-5`
+- `glm-4.7`
+- `glm-4.7-flash`
+- `glm-4.6`
+
+### OpenRouter
+
+- `anthropic/claude-sonnet-4.6`
+- `anthropic/claude-opus-4.7`
+- `deepseek/deepseek-v4-pro`
+- `deepseek/deepseek-v4-flash`
+- `z-ai/glm-5.1`
+- `qwen/qwen3.6-plus`
+- `moonshotai/kimi-k2.6`
+- `openrouter/pareto-code`
+- `openai/gpt-5.5`
+- `openai/gpt-5.5-pro`
+
 ## 说明
 
 - 兼容 provider 的配置会自动映射到内部 Anthropic-compatible 运行时。
-- 如果你已经接入 MiniMax、DashScope、Hunyuan 或自定义兼容网关，通常不需要自己手动再配 `ANTHROPIC_BASE_URL`。
+- 如果你已经接入 MiniMax、DashScope、Hunyuan、DeepSeek、Z.AI GLM、OpenRouter 或自定义兼容网关，通常不需要自己手动再配 `ANTHROPIC_BASE_URL`。

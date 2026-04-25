@@ -17,6 +17,7 @@ import {
   COMPATIBLE_PROVIDER_PRESETS,
   getCompatibleProviderPreset,
   saveCompatibleProviderSelection,
+  type CompatibleProviderModelOption,
   type CompatibleProviderSelection,
 } from '../utils/compatibleProviderSetup.js'
 import { t } from '../utils/i18n.js'
@@ -42,6 +43,7 @@ type AuthSetupStage =
   | 'provider-name'
   | 'base-url'
   | 'api-key'
+  | 'model-choice'
   | 'model'
   | 'auth-strategy'
 
@@ -57,11 +59,9 @@ function isOAuthChoice(choice: AuthSetupChoice): choice is OAuthChoice {
 }
 
 function isCompatibleChoice(choice: AuthSetupChoice): choice is CompatProfileKey {
-  return (
-    choice === 'minimax' ||
-    choice === 'dashscope' ||
-    choice === 'hunyuan' ||
-    choice === 'anthropic-compatible'
+  return Object.prototype.hasOwnProperty.call(
+    COMPATIBLE_PROVIDER_PRESETS,
+    choice,
   )
 }
 
@@ -93,6 +93,21 @@ function buildChoiceOptions(
       value: 'hunyuan',
       label: 'Tencent Hunyuan',
       description: t('auth_setup_hunyuan_desc'),
+    },
+    {
+      value: 'deepseek',
+      label: 'DeepSeek',
+      description: 'Save a DeepSeek API key and choose a current DeepSeek model.',
+    },
+    {
+      value: 'glm',
+      label: 'Z.AI GLM',
+      description: 'Save a Z.AI / GLM API key and choose a current GLM model.',
+    },
+    {
+      value: 'openrouter',
+      label: 'OpenRouter',
+      description: 'Save an OpenRouter API key and choose a current routed model.',
     },
     {
       value: 'anthropic-compatible',
@@ -234,7 +249,7 @@ export function AuthSetupFlow({
     setApiKey('')
     setBaseUrl('')
     setProviderName('')
-    setAuthStrategy('auth-token')
+    setAuthStrategy(nextPreset.defaultAuthStrategy ?? 'auth-token')
     setModel(nextPreset.defaultModel ?? '')
     setError(null)
   }
@@ -284,8 +299,15 @@ export function AuthSetupFlow({
           setChoice(null)
         }
         return
-      case 'model':
+      case 'model-choice':
         setStage('api-key')
+        return
+      case 'model':
+        if (preset?.modelOptions?.length) {
+          setStage('model-choice')
+        } else {
+          setStage('api-key')
+        }
         return
       case 'auth-strategy':
         setStage('model')
@@ -301,6 +323,7 @@ export function AuthSetupFlow({
       stage === 'provider-name' ||
       stage === 'base-url' ||
       stage === 'api-key' ||
+      stage === 'model-choice' ||
       stage === 'model' ||
       stage === 'auth-strategy',
   })
@@ -364,16 +387,10 @@ export function AuthSetupFlow({
 
     setApiKey(trimmed)
     setError(null)
-    setStage('model')
+    setStage(preset?.modelOptions?.length ? 'model-choice' : 'model')
   }
 
-  function handleModelSubmit(value: string): void {
-    const trimmed = value.trim() || preset?.defaultModel || ''
-    if (!trimmed) {
-      setError(t('auth_setup_error_model_required'))
-      return
-    }
-
+  function saveSelectedModel(trimmed: string): void {
     setModel(trimmed)
     setError(null)
 
@@ -385,11 +402,46 @@ export function AuthSetupFlow({
     if (choice && isCompatibleChoice(choice)) {
       saveCompatibleChoice(choice, {
         model: trimmed,
-        providerName: undefined,
-        baseUrl: undefined,
-        authStrategy: undefined,
       })
     }
+  }
+
+  function handleModelSubmit(value: string): void {
+    const trimmed = value.trim() || preset?.defaultModel || ''
+    if (!trimmed) {
+      setError(t('auth_setup_error_model_required'))
+      return
+    }
+
+    saveSelectedModel(trimmed)
+  }
+
+  function handleModelChoice(value: string): void {
+    if (value === '__custom_model__') {
+      setStage('model')
+      return
+    }
+
+    saveSelectedModel(value)
+  }
+
+  function buildModelOptions(
+    options: CompatibleProviderModelOption[],
+  ): OptionWithDescription<string>[] {
+    return [
+      ...options.map(option => ({
+        value: option.id,
+        label: option.label,
+        description: `${option.id}${
+          option.description ? ` - ${option.description}` : ''
+        }`,
+      })),
+      {
+        value: '__custom_model__',
+        label: 'Custom model ID',
+        description: 'Enter a model ID manually if it is not listed here.',
+      },
+    ]
   }
 
   if (stage === 'preflight' && choice && isOAuthChoice(choice)) {
@@ -466,6 +518,24 @@ export function AuthSetupFlow({
         mask="*"
         error={error}
       />
+    )
+  }
+
+  if (stage === 'model-choice' && preset?.modelOptions?.length) {
+    return (
+      <Box flexDirection="column" gap={1} paddingLeft={1}>
+        <Text bold>{t('auth_setup_model_title', { provider: preset.label })}</Text>
+        <Text dimColor wrap="wrap">{t('auth_setup_model_desc')}</Text>
+        <Select
+          options={buildModelOptions(preset.modelOptions)}
+          defaultValue={preset.defaultModel}
+          defaultFocusValue={preset.defaultModel}
+          inlineDescriptions
+          visibleOptionCount={8}
+          onChange={handleModelChoice}
+          onCancel={goBack}
+        />
+      </Box>
     )
   }
 

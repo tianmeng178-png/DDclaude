@@ -11,7 +11,7 @@ DDclaude 的目标是在尽量保留 Claude Code agent 架构和终端交互体�
 - 兼容 Claude Code 风格的终端 agent 工作流
 - 支持交互式 provider 配置，用户可以在终端里选择模型厂商并输入 API Key
 - 内置中国大陆常见模型网关接入 profile
-- 支持 MiniMax、DashScope、Tencent Hunyuan 和自定义 Anthropic-compatible 网关
+- 支持 MiniMax、DashScope、Tencent Hunyuan、DeepSeek、Z.AI GLM、OpenRouter 和自定义 Anthropic-compatible 网关
 - 支持第一版中文界面，包括欢迎页、onboarding、认证流程、模式名、状态提示和底部快捷提示
 - 支持 Windows 下通过 `claude.cmd` 直接启动
 - 保留 `bun run claude` 方式，方便开发调试
@@ -25,6 +25,9 @@ DDclaude 的目标是在尽量保留 Claude Code agent 架构和终端交互体�
 - `MiniMax`
 - `DashScope`
 - `Tencent Hunyuan`
+- `DeepSeek`
+- `Z.AI GLM`
+- `OpenRouter`
 - `Custom compatible gateway`
 
 对中国大陆用户，推荐优先使用交互式配置：
@@ -87,6 +90,14 @@ bun run claude -- --help
 ```
 
 在界面中选择 provider，输入 API Key 和模型 ID。
+
+新增 provider 会显示推荐模型列表，也可以选择 `Custom model ID` 手动输入还没有收录的新模型。
+
+当前内置推荐模型：
+
+- DeepSeek：`deepseek-v4-pro`、`deepseek-v4-flash`、`deepseek-chat`、`deepseek-reasoner`
+- Z.AI GLM：`glm-5.1`、`glm-5-turbo`、`glm-5`、`glm-4.7`、`glm-4.7-flash`、`glm-4.6`
+- OpenRouter：`anthropic/claude-sonnet-4.6`、`anthropic/claude-opus-4.7`、`deepseek/deepseek-v4-pro`、`deepseek/deepseek-v4-flash`、`z-ai/glm-5.1`、`qwen/qwen3.6-plus`、`moonshotai/kimi-k2.6`、`openrouter/pareto-code`、`openai/gpt-5.5`、`openai/gpt-5.5-pro`
 
 ### 6. 验证模型链路
 

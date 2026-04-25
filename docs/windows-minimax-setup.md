@@ -7,6 +7,9 @@
 - `MiniMax`
 - `DashScope`
 - `Tencent Hunyuan`
+- `DeepSeek`
+- `Z.AI GLM`
+- `OpenRouter`
 - 通用 `Anthropic-compatible` 自定义网关
 
 ## 推荐方式：交互式配置
@@ -89,7 +92,91 @@ $env:HUNYUAN_MODEL = "hunyuan-2.0-thinking-20251109"
 - `ANTHROPIC_BASE_URL=https://api.hunyuan.cloud.tencent.com/anthropic`
 - `ANTHROPIC_AUTH_TOKEN=<HUNYUAN_API_KEY>`
 
-### 4. 通用 Anthropic-compatible 网关
+### 4. DeepSeek
+
+```powershell
+$env:CLAUDE_CODE_USE_DEEPSEEK = "1"
+$env:DEEPSEEK_API_KEY = "your-deepseek-key"
+$env:DEEPSEEK_MODEL = "deepseek-v4-pro"
+.\claude.cmd
+```
+
+默认会映射到：
+
+- `ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic`
+- `ANTHROPIC_API_KEY=<DEEPSEEK_API_KEY>`
+
+当前推荐模型：
+
+- `deepseek-v4-pro`
+- `deepseek-v4-flash`
+- `deepseek-chat`
+- `deepseek-reasoner`
+
+### 5. Z.AI GLM
+
+```powershell
+$env:CLAUDE_CODE_USE_GLM = "1"
+$env:GLM_API_KEY = "your-glm-key"
+$env:GLM_MODEL = "glm-5.1"
+.\claude.cmd
+```
+
+默认会映射到：
+
+- `ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic`
+- `ANTHROPIC_API_KEY=<GLM_API_KEY>`
+
+也可以使用这些别名变量：
+
+- `ZAI_API_KEY`
+- `ZHIPUAI_API_KEY`
+- `BIGMODEL_API_KEY`
+- `ZAI_MODEL`
+
+当前推荐模型：
+
+- `glm-5.1`
+- `glm-5-turbo`
+- `glm-5`
+- `glm-4.7`
+- `glm-4.7-flash`
+- `glm-4.6`
+
+### 6. OpenRouter
+
+```powershell
+$env:CLAUDE_CODE_USE_OPENROUTER = "1"
+$env:OPENROUTER_API_KEY = "your-openrouter-key"
+$env:OPENROUTER_MODEL = "anthropic/claude-sonnet-4.6"
+.\claude.cmd
+```
+
+默认会映射到：
+
+- `ANTHROPIC_BASE_URL=https://openrouter.ai/api`
+- `ANTHROPIC_AUTH_TOKEN=<OPENROUTER_API_KEY>`
+
+当前推荐模型：
+
+- `anthropic/claude-sonnet-4.6`
+- `anthropic/claude-opus-4.7`
+- `deepseek/deepseek-v4-pro`
+- `deepseek/deepseek-v4-flash`
+- `z-ai/glm-5.1`
+- `qwen/qwen3.6-plus`
+- `moonshotai/kimi-k2.6`
+- `openrouter/pareto-code`
+- `openai/gpt-5.5`
+- `openai/gpt-5.5-pro`
+
+OpenRouter 的完整模型列表变化非常快，可以通过官方动态接口查看：
+
+```text
+https://openrouter.ai/api/v1/models
+```
+
+### 7. 通用 Anthropic-compatible 网关
 
 ```powershell
 $env:CLAUDE_CODE_USE_ANTHROPIC_COMPATIBLE = "1"
@@ -215,3 +302,6 @@ $env:CLAUDE_CODE_UI_LANGUAGE = "zh-CN"
 - [MiniMax Claude Code 接入文档](https://platform.minimax.io/docs/guides/text-ai-coding-tools)
 - [阿里云百炼 Claude Code 接入文档](https://help.aliyun.com/zh/model-studio/claude-code)
 - [腾讯混元 Claude Code 接入文档](https://cloud.tencent.com/document/product/1729/127293)
+- [DeepSeek Anthropic API 文档](https://api-docs.deepseek.com/guides/anthropic_api)
+- [Z.AI GLM-5.1 Coding Agent 文档](https://docs.z.ai/devpack/using5.1)
+- [OpenRouter 模型列表 API](https://openrouter.ai/api/v1/models)

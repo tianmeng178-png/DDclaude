@@ -5,6 +5,9 @@ export type CompatProfileKey =
   | 'minimax'
   | 'dashscope'
   | 'hunyuan'
+  | 'deepseek'
+  | 'glm'
+  | 'openrouter'
 
 export type CompatAuthStrategy = 'api-key' | 'auth-token'
 
@@ -14,6 +17,7 @@ type CompatProfileDefinition = {
   defaultBaseUrl?: string | ((model: string | undefined) => string | undefined)
   defaultModel?: string
   defaultDescription: string
+  defaultAuthStrategy?: CompatAuthStrategy
   enableEnvVars: string[]
   apiKeyEnvVars: string[]
   baseUrlEnvVars: string[]
@@ -95,6 +99,47 @@ const COMPAT_PROFILES: Record<CompatProfileKey, CompatProfileDefinition> = {
     baseUrlEnvVars: ['HUNYUAN_BASE_URL'],
     modelEnvVars: ['HUNYUAN_MODEL'],
   },
+  deepseek: {
+    key: 'deepseek',
+    displayName: 'DeepSeek',
+    defaultBaseUrl: 'https://api.deepseek.com/anthropic',
+    defaultModel: 'deepseek-v4-pro',
+    defaultDescription: 'DeepSeek Anthropic-compatible coding model',
+    defaultAuthStrategy: 'api-key',
+    enableEnvVars: ['CLAUDE_CODE_USE_DEEPSEEK'],
+    apiKeyEnvVars: ['DEEPSEEK_API_KEY'],
+    baseUrlEnvVars: ['DEEPSEEK_BASE_URL'],
+    modelEnvVars: ['DEEPSEEK_MODEL'],
+  },
+  glm: {
+    key: 'glm',
+    displayName: 'Z.AI GLM',
+    defaultBaseUrl: 'https://api.z.ai/api/anthropic',
+    defaultModel: 'glm-5.1',
+    defaultDescription: 'Z.AI GLM Anthropic-compatible coding model',
+    defaultAuthStrategy: 'api-key',
+    enableEnvVars: ['CLAUDE_CODE_USE_GLM', 'CLAUDE_CODE_USE_ZAI'],
+    apiKeyEnvVars: [
+      'GLM_API_KEY',
+      'ZAI_API_KEY',
+      'ZHIPUAI_API_KEY',
+      'BIGMODEL_API_KEY',
+    ],
+    baseUrlEnvVars: ['GLM_BASE_URL', 'ZAI_BASE_URL'],
+    modelEnvVars: ['GLM_MODEL', 'ZAI_MODEL'],
+  },
+  openrouter: {
+    key: 'openrouter',
+    displayName: 'OpenRouter',
+    defaultBaseUrl: 'https://openrouter.ai/api',
+    defaultModel: 'anthropic/claude-sonnet-4.6',
+    defaultDescription: 'OpenRouter Anthropic-compatible model',
+    defaultAuthStrategy: 'auth-token',
+    enableEnvVars: ['CLAUDE_CODE_USE_OPENROUTER'],
+    apiKeyEnvVars: ['OPENROUTER_API_KEY'],
+    baseUrlEnvVars: ['OPENROUTER_BASE_URL'],
+    modelEnvVars: ['OPENROUTER_MODEL'],
+  },
 }
 
 const COMPAT_PROVIDER_ALIASES: Record<string, CompatProfileKey> = {
@@ -110,6 +155,18 @@ const COMPAT_PROVIDER_ALIASES: Record<string, CompatProfileKey> = {
   tencent: 'hunyuan',
   'tencent-hunyuan': 'hunyuan',
   tencent_hunyuan: 'hunyuan',
+  deepseek: 'deepseek',
+  ds: 'deepseek',
+  glm: 'glm',
+  zai: 'glm',
+  'z-ai': 'glm',
+  z_ai: 'glm',
+  zhipu: 'glm',
+  zhipuai: 'glm',
+  bigmodel: 'glm',
+  openrouter: 'openrouter',
+  'open-router': 'openrouter',
+  open_router: 'openrouter',
 }
 
 function isTruthy(value: string | undefined): boolean {
@@ -192,6 +249,15 @@ export function inferCompatibleProviderNameFromBaseUrl(
     ) {
       return 'Tencent Hunyuan'
     }
+    if (host.includes('deepseek.com')) {
+      return 'DeepSeek'
+    }
+    if (host.includes('api.z.ai') || host.includes('bigmodel.cn')) {
+      return 'Z.AI GLM'
+    }
+    if (host.includes('openrouter.ai')) {
+      return 'OpenRouter'
+    }
     return host
   } catch {
     return undefined
@@ -267,10 +333,15 @@ function resolveCompatProfile(env: EnvMap = process.env): ResolvedCompatProfile 
     readFirstDefined(env, ['CLAUDE_CODE_COMPAT_BASE_URL', ...profile.baseUrlEnvVars]) ||
     getDefaultBaseUrl(profile, mainModel)
   const providerName = getDefaultProviderName(profile, env, baseUrl)
+  const configuredAuthStrategy = env.CLAUDE_CODE_COMPAT_AUTH_STRATEGY
+    ?.trim()
+    .toLowerCase()
   const authStrategy =
-    env.CLAUDE_CODE_COMPAT_AUTH_STRATEGY?.trim().toLowerCase() === 'api-key'
+    configuredAuthStrategy === 'api-key'
       ? 'api-key'
-      : 'auth-token'
+      : configuredAuthStrategy === 'auth-token'
+        ? 'auth-token'
+        : (profile.defaultAuthStrategy ?? 'auth-token')
 
   const sonnetModel =
     readFirstDefined(env, ['CLAUDE_CODE_COMPAT_SONNET_MODEL']) || mainModel
